@@ -288,6 +288,7 @@ extern UniValue placeparlaybet(const UniValue& params, bool fHelp);
 extern UniValue listbets(const UniValue& params, bool fHelp);
 extern UniValue getmappingid(const UniValue& params, bool fHelp);
 extern UniValue getmappingname(const UniValue& params, bool fHelp);
+extern UniValue getmappingjson(const UniValue& params, bool fHelp);
 extern UniValue getbet(const UniValue& params, bool fHelp);
 extern UniValue listbetsdb(const UniValue& params, bool fHelp);
 
