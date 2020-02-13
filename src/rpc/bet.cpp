@@ -82,7 +82,7 @@ UniValue getmappingid(const UniValue& params, bool fHelp)
 
     // If no mapping found then create a new one and add to the given map index.
     if (!mappingFound) {
-        throw runtime_error("Currently no mapping index exists for the mapping index you provided.");
+        throw std::runtime_error("Currently no mapping index exists for the mapping index you provided.");
     }
 
     result.push_back(mappings);
@@ -152,56 +152,44 @@ UniValue getmappingname(const UniValue& params, bool fHelp)
  * @return
  */
 UniValue getmappingjson(const UniValue &params, bool fHelp) {
-    if (fHelp || (params.size() < 1))
-        throw runtime_error(
-                "getmappingjson\n"
-                "\nGet a mapping array from the specified map index.\n"
+    if (fHelp || (params.size() < 2))
+        throw std::runtime_error(
+                "getmappingid\n"
+                "\nGet a mapping ID from the specified mapping index.\n"
 
                 "\nResult:\n"
                 "[\n"
                 "  {\n"
-                "    \"mapping name\": \"xxx\",  (string) The mapping name.\n"
-                "    \"exists\": \"xxx\", (boolean) mapping transaction created or not\n"
+                "    \"mapping index id\": \"xxx\",  (numeric) The mapping index.\n"
+                "    \"exists\": \"xxx\", (boolean) mapping id exists\n"
                 "    \"mapping-index\": \"xxx\" (string) The index that was searched.\n"
                 "  }\n"
                 "]\n"
 
                 "\nExamples:\n" +
-                HelpExampleCli("getmappingjson", "") + HelpExampleRpc("getmappingjson", ""));
+                HelpExampleCli("getmappingid", "") + HelpExampleRpc("getmappingid", ""));
 
-    std::string mIndex = params[0].get_str();
+    const std::string name{params[1].get_str()};
+    const std::string mIndex{params[0].get_str()};
+    const MappingTypes type{CMapping::FromTypeName(mIndex)};
+    UniValue result{UniValue::VARR};
+    UniValue mappings{UniValue::VOBJ};
 
-    mappingIndex_t mappingIndex;
-    CMappingDB cmdb;
-
-    UniValue ret(UniValue::VARR);
-
-    // Select the map we want to look up based on user input.
-    if (mIndex == "sports") {
-        CMappingDB cmdb("sports.dat");
-        cmdb.GetSports(mappingIndex);
-    } else if (mIndex == "rounds") {
-        CMappingDB cmdb("rounds.dat");
-        cmdb.GetRounds(mappingIndex);
-    } else if (mIndex == "teamnames") {
-        CMappingDB cmdb("teams.dat");
-        cmdb.GetTeams(mappingIndex);
-    } else if (mIndex == "tournaments") {
-        CMappingDB cmdb("tournaments.dat");
-        cmdb.GetTournaments(mappingIndex);
-    } else {
-        throw runtime_error("Currently no mapping index exists for the mapping index you provided.");
+    if (static_cast<int>(type) < 0 || CMapping::ToTypeName(type) != mIndex) {
+        throw std::runtime_error("No mapping exist for the mapping index you provided.");
     }
 
-    // Check the map for the mapping ID.
-    map<uint32_t, CMapping>::iterator it;
-    for (it = mappingIndex.begin(); it != mappingIndex.end(); it++) {
-        UniValue mapping(UniValue::VOBJ);
-        mapping.push_back(Pair("mapping-id", (uint64_t) it->second.nId));
-        mapping.push_back(Pair("mapping-name", it->second.sName));
-        mapping.push_back(Pair("exists", true));
-        mapping.push_back(Pair("mapping-index", mIndex));
-        ret.push_back(mapping);
+    auto it = bettingsView->mappings->NewIterator();
+    MappingKey key{};
+    for (it->Seek(CBettingDB::DbTypeToBytes(MappingKey{type, 0})); it->Valid() && (CBettingDB::BytesToDbType(it->Key(), key), key.nMType == type); it->Next()) {
+        CMapping mapping{};
+        CBettingDB::BytesToDbType(it->Value(), mapping);
+        mappings.push_back(Pair("mapping-id", (uint64_t) mapping.nId));
+        mappings.push_back(Pair("mapping-name", mapping.sName));
+        mappings.push_back(Pair("exists", true));
+        mappings.push_back(Pair("mapping-index", mIndex));
+        result.push_back(mappings);
     }
-    return ret;
+    return result;
+
 }
