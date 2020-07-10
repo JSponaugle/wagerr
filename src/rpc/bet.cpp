@@ -129,6 +129,58 @@ UniValue getmappingname(const UniValue& params, bool fHelp)
     return result;
 }
 
+/**
+ * Display mapping in json object array
+ * If its not found return an error message.
+ *
+ * @param params The RPC params consisting of an map index name.
+ * @param fHelp  Help text
+ * @return
+ */
+UniValue getmappingjson(const UniValue &params, bool fHelp)
+{
+    if (fHelp || (params.size() < 1))
+        throw std::runtime_error(
+                "getmappingjson\n"
+                "\nGet a mapping array from the specified map index.\n"
+
+                "\nResult:\n"
+                "[\n"
+                "  {\n"
+                "    \"mapping name\": \"xxx\",  (string) The mapping name.\n"
+                "    \"exists\": \"xxx\", (boolean) mapping transaction created or not\n"
+                "    \"mapping-index\": \"xxx\" (string) The index that was searched.\n"
+                "  }\n"
+                "]\n"
+
+                "\nExamples:\n" +
+                HelpExampleCli("getmappingjson", "") + HelpExampleRpc("getmappingjson", ""));
+
+    const std::string mIndex{params[0].get_str()};
+    const MappingTypes type{CMapping::FromTypeName(mIndex)};
+    UniValue result{UniValue::VARR};
+    UniValue mappings{UniValue::VOBJ};
+
+    if (static_cast<int>(type) < 0 || CMapping::ToTypeName(type) != mIndex) {
+        throw std::runtime_error("No mapping exist for the mapping index you provided.");
+    }
+
+    auto it = bettingsView->mappings->NewIterator();
+    MappingKey key{};
+    for (it->Seek(CBettingDB::DbTypeToBytes(MappingKey{type, 0})); it->Valid() && (CBettingDB::BytesToDbType(it->Key(), key), key.nMType == type); it->Next()) {
+        CMapping mapping{};
+        CBettingDB::BytesToDbType(it->Value(), mapping);
+        mappings.push_back(Pair("mapping-id", (uint64_t) mapping.nId));
+        mappings.push_back(Pair("mapping-name", mapping.sName));
+        mappings.push_back(Pair("exists", true));
+        mappings.push_back(Pair("mapping-index", mIndex));
+    }
+
+    result.push_back(mappings);
+
+    return result;
+}
+
 std::string GetPayoutTypeStr(PayoutType type)
 {
     switch(type) {
