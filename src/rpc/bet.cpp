@@ -63,12 +63,29 @@ UniValue getmappingid(const UniValue& params, bool fHelp)
         CBettingDB::BytesToDbType(it->Value(), mapping);
         LogPrintf("%s - mapping - it=[%d,%d] nId=[%d] nMType=[%s] [%s]\n", __func__, key.nMType, key.nId, key.nId, CMappingDB::ToTypeName(key.nMType), mapping.sName);
         if (!mappingFound) {
+            
+            // As an Oracle Node, just by calling this RPC method it would
+            // create a local mapping if no existing mapping was found. This
+            // could lead to possible mismatches between local state and
+            // network state. While the Oracle Node is run by the Wagerr team,
+            // comment out the this code as we handle it outside the core code
+            // (for now).
+            throw std::runtime_error("Currently no mapping index exists for the mapping index you provided.");
+
+            // TODO: When Oracle Nodes become decentralized we need to revisit
+            //       this caching code and how it can be reworked for a
+            //       decentralized network all submitting new mappings
+            //       simultaneously that may clash and invalidating a local
+            //       cache if the network (source of truth) says it's wrong.
+
+            /*
+            
             if (mapping.sName == name) {
                 mappings.push_back(Pair("mapping-id", (uint64_t) key.nId));
                 mappings.push_back(Pair("exists", true));
                 mappings.push_back(Pair("mapping-index", mIndex));
                 mappingFound = true;
-            }
+            }*/
         }
     }
     if (mappingFound)
