@@ -174,20 +174,20 @@ UniValue getmappingjson(const UniValue &params, bool fHelp)
                 HelpExampleCli("getmappingjson", "") + HelpExampleRpc("getmappingjson", ""));
 
     const std::string mIndex{params[0].get_str()};
-    const MappingTypes type{CMapping::FromTypeName(mIndex)};
+    const MappingTypes type{CMappingDB::FromTypeName(mIndex)};
     UniValue result{UniValue::VARR};
     UniValue mappings{UniValue::VOBJ};
 
-    if (static_cast<int>(type) < 0 || CMapping::ToTypeName(type) != mIndex) {
+    if (static_cast<int>(type) < 0 || CMappingDB::ToTypeName(type) != mIndex) {
         throw std::runtime_error("No mapping exist for the mapping index you provided.");
     }
 
     auto it = bettingsView->mappings->NewIterator();
     MappingKey key{};
     for (it->Seek(CBettingDB::DbTypeToBytes(MappingKey{type, 0})); it->Valid() && (CBettingDB::BytesToDbType(it->Key(), key), key.nMType == type); it->Next()) {
-        CMapping mapping{};
+        CMappingDB mapping{};
         CBettingDB::BytesToDbType(it->Value(), mapping);
-        mappings.push_back(Pair("mapping-id", (uint64_t) mapping.nId));
+        mappings.push_back(Pair("mapping-id", (uint64_t) key.nId));
         mappings.push_back(Pair("mapping-name", mapping.sName));
         mappings.push_back(Pair("exists", true));
         mappings.push_back(Pair("mapping-index", mIndex));
