@@ -174,7 +174,7 @@ UniValue getmappingjson(const UniValue &params, bool fHelp)
                 HelpExampleCli("getmappingjson", "") + HelpExampleRpc("getmappingjson", ""));
 
     const std::string mIndex{params[0].get_str()};
-    const MappingTypes type{CMappingDB::FromTypeName(mIndex)};
+    const MappingType type{CMappingDB::FromTypeName(mIndex)};
     UniValue result{UniValue::VARR};
     UniValue mappings{UniValue::VOBJ};
 
