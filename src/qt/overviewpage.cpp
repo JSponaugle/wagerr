@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2018 The PIVX developers
 // Copyright (c) 2018 The Wagerr developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -14,7 +14,6 @@
 #include "guiutil.h"
 #include "init.h"
 #include "obfuscation.h"
-#include "obfuscationconfig.h"
 #include "optionsmodel.h"
 #include "transactionfilterproxy.h"
 #include "transactionrecord.h"
@@ -209,13 +208,19 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
         nLockedBalance = pwalletMain->GetLockedCoins();
         nWatchOnlyLockedBalance = pwalletMain->GetLockedWatchOnlyBalance();
     }
+
     // WGR Balance
     CAmount nTotalBalance = balance + unconfirmedBalance;
-    CAmount wgrAvailableBalance = balance - immatureBalance - nLockedBalance;
-    CAmount nTotalWatchBalance = watchOnlyBalance + watchUnconfBalance + watchImmatureBalance;    
+    CAmount wgrAvailableBalance = balance - immatureBalance - nLockedBalance;   
     CAmount nUnlockedBalance = nTotalBalance - nLockedBalance;
+
+    // WGR Watch-Only Balance
+    CAmount nTotalWatchBalance = watchOnlyBalance + watchUnconfBalance;
+    CAmount nAvailableWatchBalance = watchOnlyBalance - watchImmatureBalance - nWatchOnlyLockedBalance;
+
     // zWGR Balance
-    CAmount matureZerocoinBalance = zerocoinBalance - immatureZerocoinBalance;
+    CAmount matureZerocoinBalance = zerocoinBalance - unconfirmedZerocoinBalance - immatureZerocoinBalance;
+
     // Percentages
     QString szPercentage = "";
     QString sPercentage = "";
@@ -232,7 +237,7 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     ui->labelTotal->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, nTotalBalance, false, BitcoinUnits::separatorAlways));
 
     // Watchonly labels
-    ui->labelWatchAvailable->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchOnlyBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchAvailable->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, nAvailableWatchBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchPending->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchUnconfBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchImmature->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, watchImmatureBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchLocked->setText(BitcoinUnits::floorHtmlWithUnit(nDisplayUnit, nWatchOnlyLockedBalance, false, BitcoinUnits::separatorAlways));
@@ -254,7 +259,7 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
 
     // Adjust bubble-help according to AutoMint settings
     QString automintHelp = tr("Current percentage of zWGR.\nIf AutoMint is enabled this percentage will settle around the configured AutoMint percentage (default = 10%).\n");
-    bool fEnableZeromint = GetBoolArg("-enablezeromint", true);
+    bool fEnableZeromint = GetBoolArg("-enablezeromint", false);
     int nZeromintPercentage = GetArg("-zeromintpercentage", 10);
     if (fEnableZeromint) {
         automintHelp += tr("AutoMint is currently enabled and set to ") + QString::number(nZeromintPercentage) + "%.\n";
@@ -267,30 +272,42 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     // Only show most balances if they are non-zero for the sake of simplicity
     QSettings settings;
     bool settingShowAllBalances = !settings.value("fHideZeroBalances").toBool();
+
     bool showSumAvailable = settingShowAllBalances || sumTotalBalance != availableTotalBalance;
     ui->labelBalanceTextz->setVisible(showSumAvailable);
     ui->labelBalancez->setVisible(showSumAvailable);
-    bool showWGRAvailable = settingShowAllBalances || wgrAvailableBalance != nTotalBalance;
-    bool showWatchOnlyWGRAvailable = watchOnlyBalance != nTotalWatchBalance;
-    bool showWGRPending = settingShowAllBalances || unconfirmedBalance != 0;
-    bool showWatchOnlyWGRPending = watchUnconfBalance != 0;
-    bool showWGRLocked = settingShowAllBalances || nLockedBalance != 0;
-    bool showWatchOnlyWGRLocked = nWatchOnlyLockedBalance != 0;
-    bool showImmature = settingShowAllBalances || immatureBalance != 0;
-    bool showWatchOnlyImmature = watchImmatureBalance != 0;
+
     bool showWatchOnly = nTotalWatchBalance != 0;
-    ui->labelBalance->setVisible(showWGRAvailable || showWatchOnlyWGRAvailable);
+
+    // WGR Available
+    bool showWGRAvailable = settingShowAllBalances || wgrAvailableBalance != nTotalBalance;
+    bool showWatchOnlyWGRAvailable = showWGRAvailable || nAvailableWatchBalance != nTotalWatchBalance;
     ui->labelBalanceText->setVisible(showWGRAvailable || showWatchOnlyWGRAvailable);
-    ui->labelWatchAvailable->setVisible(showWGRAvailable && showWatchOnly);
-    ui->labelUnconfirmed->setVisible(showWGRPending || showWatchOnlyWGRPending);
+    ui->labelBalance->setVisible(showWGRAvailable || showWatchOnlyWGRAvailable);
+    ui->labelWatchAvailable->setVisible(showWatchOnlyWGRAvailable && showWatchOnly);
+
+    // WGR Pending
+    bool showWGRPending = settingShowAllBalances || unconfirmedBalance != 0;
+    bool showWatchOnlyWGRPending = showWGRPending || watchUnconfBalance != 0;
     ui->labelPendingText->setVisible(showWGRPending || showWatchOnlyWGRPending);
-    ui->labelWatchPending->setVisible(showWGRPending && showWatchOnly);
-    ui->labelLockedBalance->setVisible(showWGRLocked || showWatchOnlyWGRLocked);
+    ui->labelUnconfirmed->setVisible(showWGRPending || showWatchOnlyWGRPending);
+    ui->labelWatchPending->setVisible(showWatchOnlyWGRPending && showWatchOnly);
+
+    // WGR Immature
+    bool showWGRImmature = settingShowAllBalances || immatureBalance != 0;
+    bool showWatchOnlyImmature = showWGRImmature || watchImmatureBalance != 0;
+    ui->labelImmatureText->setVisible(showWGRImmature || showWatchOnlyImmature);
+    ui->labelImmature->setVisible(showWGRImmature || showWatchOnlyImmature); // for symmetry reasons also show immature label when the watch-only one is shown
+    ui->labelWatchImmature->setVisible(showWatchOnlyImmature && showWatchOnly); // show watch-only immature balance
+
+    // WGR Locked
+    bool showWGRLocked = settingShowAllBalances || nLockedBalance != 0;
+    bool showWatchOnlyWGRLocked = showWGRLocked || nWatchOnlyLockedBalance != 0;
     ui->labelLockedBalanceText->setVisible(showWGRLocked || showWatchOnlyWGRLocked);
-    ui->labelWatchLocked->setVisible(showWGRLocked && showWatchOnly);
-    ui->labelImmature->setVisible(showImmature || showWatchOnlyImmature); // for symmetry reasons also show immature label when the watch-only one is shown
-    ui->labelImmatureText->setVisible(showImmature || showWatchOnlyImmature);
-    ui->labelWatchImmature->setVisible(showImmature && showWatchOnly); // show watch-only immature balance
+    ui->labelLockedBalance->setVisible(showWGRLocked || showWatchOnlyWGRLocked);
+    ui->labelWatchLocked->setVisible(showWatchOnlyWGRLocked && showWatchOnly);
+
+    // zWGR
     bool showzWGRAvailable = settingShowAllBalances || zerocoinBalance != matureZerocoinBalance;
     bool showzWGRUnconfirmed = settingShowAllBalances || unconfirmedZerocoinBalance != 0;
     bool showzWGRImmature = settingShowAllBalances || immatureZerocoinBalance != 0;
@@ -300,6 +317,8 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     ui->labelzBalanceUnconfirmedText->setVisible(showzWGRUnconfirmed);
     ui->labelzBalanceImmature->setVisible(showzWGRImmature);
     ui->labelzBalanceImmatureText->setVisible(showzWGRImmature);
+
+    // Percent split
     bool showPercentages = ! (zerocoinBalance == 0 && nTotalBalance == 0);
     ui->labelWGRPercent->setVisible(showPercentages);
     ui->labelzWGRPercent->setVisible(showPercentages);
@@ -375,6 +394,10 @@ void OverviewPage::setWalletModel(WalletModel* model)
 
     // update the display unit, to not use the default ("WGR")
     updateDisplayUnit();
+
+    // Hide orphans
+    QSettings settings;
+    hideOrphans(settings.value("fHideOrphans", false).toBool());
 }
 
 void OverviewPage::updateDisplayUnit()
@@ -402,4 +425,10 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+}
+
+void OverviewPage::hideOrphans(bool fHide)
+{
+    if (filter)
+        filter->setHideOrphans(fHide);
 }

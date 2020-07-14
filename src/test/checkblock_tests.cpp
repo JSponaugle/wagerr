@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 The Bitcoin Core developers
+// Copyright (c) 2013-2014 The Bitcoin Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,6 +11,7 @@
 #include "clientversion.h"
 #include "main.h"
 #include "utiltime.h"
+#include "test/test_wagerr.h"
 
 #include <cstdio>
 
@@ -19,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-BOOST_AUTO_TEST_SUITE(CheckBlock_tests)
+BOOST_FIXTURE_TEST_SUITE(CheckBlock_tests, BasicTestingSetup)
 
 bool read_block(const std::string& filename, CBlock& block)
 {

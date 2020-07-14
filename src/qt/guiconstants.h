@@ -1,6 +1,6 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX developers
+// Copyright (c) 2015-2018 The PIVX developers
 // Copyright (c) 2018 The Wagerr developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -9,7 +9,7 @@
 #define BITCOIN_QT_GUICONSTANTS_H
 
 /* Milliseconds between model updates */
-static const int MODEL_UPDATE_DELAY = 250;
+static const int MODEL_UPDATE_DELAY = 1000;
 
 /* AskPassphraseDialog -- Maximum passphrase length */
 static const int MAX_PASSPHRASE_SIZE = 1024;
@@ -36,6 +36,10 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_BLACK QColor(51, 51, 51)
 /* Transaction list -- TX status decoration - conflicted */
 #define COLOR_CONFLICTED QColor(255, 0, 0)
+/* Transaction list -- TX status decoration - orphan (Light Gray #D3D3D3) */
+#define COLOR_ORPHAN QColor(211, 211, 211)
+/* Transaction list -- TX status decoration - stake (DarkGrey #5c5c5c) */
+#define COLOR_STAKE QColor(92, 92, 92)
 
 /* Tooltips longer than this (in characters) are converted into rich text,
    so that they can be word-wrapped.
@@ -53,7 +57,8 @@ static const int MAX_URI_LENGTH = 255;
 
 #define QAPP_ORG_NAME "WAGERR"
 #define QAPP_ORG_DOMAIN "wagerr.com"
-#define QAPP_APP_NAME_DEFAULT "WAGERR-Qt"
-#define QAPP_APP_NAME_TESTNET "WAGERR-Qt-testnet"
+#define QAPP_APP_NAME_DEFAULT "Wagerr-Qt"
+#define QAPP_APP_NAME_TESTNET "Wagerr-Qt-testnet"
+#define QAPP_APP_NAME_REGTEST "Wagerr-Qt-regtest"
 
 #endif // BITCOIN_QT_GUICONSTANTS_H

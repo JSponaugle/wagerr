@@ -13,13 +13,12 @@
 
 #include "base58.h"
 #include "chainparams.h"
-#include "ui_interface.h"
+#include "guiinterface.h"
 #include "util.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 
 #include <cstdlib>
 
-#include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 
 #include <QApplication>
@@ -49,8 +48,6 @@
 #include <QUrlQuery>
 #endif
 
-using namespace boost;
-using namespace std;
 
 const int BITCOIN_IPC_CONNECT_TIMEOUT = 1000; // milliseconds
 const QString BITCOIN_IPC_PREFIX("wagerr:");
@@ -87,7 +84,7 @@ namespace // Anon namespace
 //
 static QString ipcServerName()
 {
-    QString name("WagerrQt");
+    QString name("WAGERRQt");
 
     // Append a simple hash of the datadir
     // Note that GetDataDir(true) returns a different path
@@ -587,7 +584,7 @@ void PaymentServer::fetchPaymentACK(CWallet* wallet, SendCoinsRecipient recipien
     // Create a new refund address, or re-use:
     QString account = tr("Refund from %1").arg(recipient.authenticatedMerchant);
     std::string strAccount = account.toStdString();
-    set<CTxDestination> refundAddresses = wallet->GetAccountAddresses(strAccount);
+    std::set<CTxDestination> refundAddresses = wallet->GetAccountAddresses(strAccount);
     if (!refundAddresses.empty()) {
         CScript s = GetScriptForDestination(*refundAddresses.begin());
         payments::Output* refund_to = payment.add_refund_to();

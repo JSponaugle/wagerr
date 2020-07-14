@@ -10,8 +10,6 @@
  * @license    This project is released under the MIT license.
  **/
 // Copyright (c) 2017 The PIVX developers
-// Copyright (c) 2018 The Wagerr developers
-
 
 #include <string>
 #include <iostream>
@@ -23,8 +21,6 @@
 #define DEFAULT_MODULUS_SIZE    3072
 #define MIN_MODULUS_SIZE        1026
 
-using namespace std;
-using namespace libzerocoin;
 
 void
 PrintWarning()

@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
+// Copyright (c) 2017-2018 The PIVX developers
 // Copyright (c) 2018 The Wagerr developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -28,30 +29,32 @@ public:
     explicit OptionsModel(QObject* parent = 0);
 
     enum OptionID {
-        StartAtStartup,      // bool
-        MinimizeToTray,      // bool
-        MapPortUPnP,         // bool
-        MinimizeOnClose,     // bool
-        ProxyUse,            // bool
-        ProxyIP,             // QString
-        ProxyPort,           // int
-        DisplayUnit,         // BitcoinUnits::Unit
-        ThirdPartyTxUrls,    // QString
-        Digits,              // QString
-        Theme,               // QString
-        Language,            // QString
-        CoinControlFeatures, // bool
-        ThreadsScriptVerif,  // int
-        DatabaseCache,       // int
-        SpendZeroConfChange, // bool
-        ZeromintEnable,      // bool
-        ZeromintPercentage,  // int
-        ZeromintPrefDenom,   // int
-        HideZeroBalances,    // bool
-        AnonymizeWagerrAmount, //int
-        ShowMasternodesTab,  // bool
-        Listen,              // bool
-        StakeSplitThreshold, // int
+        StartAtStartup,         // bool
+        MinimizeToTray,         // bool
+        MapPortUPnP,            // bool
+        MinimizeOnClose,        // bool
+        ProxyUse,               // bool
+        ProxyIP,                // QString
+        ProxyPort,              // int
+        DisplayUnit,            // BitcoinUnits::Unit
+        ThirdPartyTxUrls,       // QString
+        Digits,                 // QString
+        Theme,                  // QString
+        Language,               // QString
+        CoinControlFeatures,    // bool
+        ThreadsScriptVerif,     // int
+        DatabaseCache,          // int
+        SpendZeroConfChange,    // bool
+        ZeromintEnable,         // bool
+        ZeromintAddresses,      // bool
+        ZeromintPercentage,     // int
+        ZeromintPrefDenom,      // int
+        HideZeroBalances,       // bool
+        HideOrphans,            // bool
+        AnonymizeWagerrAmount,  //int
+        ShowMasternodesTab,     // bool
+        Listen,                 // bool
+        StakeSplitThreshold,    // int
         OptionIDRowCount,
     };
 
@@ -89,6 +92,7 @@ private:
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     bool fHideZeroBalances;
+    bool fHideOrphans;
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;
 
@@ -98,11 +102,13 @@ private:
 signals:
     void displayUnitChanged(int unit);
     void zeromintEnableChanged(bool);
+    void zeromintAddressesChanged(bool);
     void zeromintPercentageChanged(int);
     void preferredDenomChanged(int);
     void anonymizeWagerrAmountChanged(int);
     void coinControlFeaturesChanged(bool);
     void hideZeroBalancesChanged(bool);
+    void hideOrphansChanged(bool);
 };
 
 #endif // BITCOIN_QT_OPTIONSMODEL_H

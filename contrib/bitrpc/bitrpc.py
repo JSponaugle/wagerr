@@ -1,5 +1,3 @@
-# Copyright (c) 2018 The Wagerr developers
-
 from jsonrpc import ServiceProxy
 import sys
 import string
@@ -24,7 +22,7 @@ if cmd == "backupwallet":
         print access.backupwallet(path)
     except:
         print "\n---An error occurred---\n"
-        
+
 elif cmd == "encryptwallet":
     try:
         pwd = getpass.getpass(prompt="Enter passphrase: ")
@@ -218,6 +216,30 @@ elif cmd == "listtransactions":
             print access.listtransactions(acct, count, frm)
         except:
             print access.listtransactions()
+    except:
+        print "\n---An error occurred---\n"
+
+elif cmd == "listtransactionrecords":
+    try:
+        acct = raw_input("Account (optional): ")
+        count = raw_input("Number of transactions (optional): ")
+        frm = raw_input("Skip (optional):")
+        try:
+            print access.listtransactionrecords(acct, count, frm)
+        except:
+            print access.listtransactionrecords()
+    except:
+        print "\n---An error occurred---\n"
+
+elif cmd == "listtransactionrecords":
+    try:
+        acct = raw_input("Account (optional): ")
+        count = raw_input("Number of transactions (optional): ")
+        frm = raw_input("Skip (optional):")
+        try:
+            print access.listtransactionrecords(acct, count, frm)
+        except:
+            print access.listtransactionrecords()
     except:
         print "\n---An error occurred---\n"
 

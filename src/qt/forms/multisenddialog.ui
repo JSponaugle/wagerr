@@ -17,16 +17,7 @@
    <string>MultiSend</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
-   <property name="leftMargin">
-    <number>6</number>
-   </property>
-   <property name="topMargin">
-    <number>6</number>
-   </property>
-   <property name="rightMargin">
-    <number>6</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>6</number>
    </property>
    <item>
@@ -148,7 +139,7 @@ MultiSend will not be activated unless you have clicked Activate</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="addressBookButton">
+          <widget class="QToolButton" name="addressBookButton">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -167,9 +158,6 @@ MultiSend will not be activated unless you have clicked Activate</string>
            </property>
            <property name="shortcut">
             <string>Alt+A</string>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
            </property>
           </widget>
          </item>

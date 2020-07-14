@@ -10,7 +10,6 @@
  * @license    This project is released under the MIT license.
  **/
 // Copyright (c) 2017 The PIVX developers
-// Copyright (c) 2018 The Wagerr developers
 
 #ifndef COMMITMENT_H_
 #define COMMITMENT_H_
@@ -39,6 +38,7 @@ public:
 	 * @param value the value to commit to
 	 */
 	Commitment(const IntegerGroupParams* p, const CBigNum& value);
+    explicit Commitment(const IntegerGroupParams* p, const CBigNum& bnSerial, const CBigNum& bnRandomness);
 	const CBigNum& getCommitmentValue() const;
 	const CBigNum& getRandomness() const;
 	const CBigNum& getContents() const;
@@ -60,6 +60,7 @@ private:
  */
 class CommitmentProofOfKnowledge {
 public:
+    CommitmentProofOfKnowledge(){};
 	CommitmentProofOfKnowledge(const IntegerGroupParams* ap, const IntegerGroupParams* bp);
 	/** Generates a proof that two commitments, a and b, open to the same value.
 	 *

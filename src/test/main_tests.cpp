@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018 The Bitcoin Core developers
+// Copyright (c) 2014 The Bitcoin Core developers
 // Copyright (c) 2014-2015 The Dash developers
 // Copyright (c) 2015-2017 The PIVX developers
 // Copyright (c) 2018 The Wagerr developers
@@ -7,10 +7,11 @@
 
 #include "primitives/transaction.h"
 #include "main.h"
+#include "test_wagerr.h"
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(main_tests)
+BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
 
 CAmount nMoneySupplyPoWEnd = 398360470 * COIN;
 
@@ -46,7 +47,7 @@ BOOST_AUTO_TEST_CASE(subsidy_limit_test)
         nSum += nSubsidy;
         BOOST_CHECK(nSum > 0 && nSum <= nMoneySupplyPoWEnd);
     }
-    // BOOST_CHECK(nSum == 19626072100000000ULL);
+    BOOST_CHECK(nSum == 19836047100000000ULL);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

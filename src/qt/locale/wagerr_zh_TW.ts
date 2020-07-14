@@ -43,11 +43,11 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>選擇要匯出Wagerr幣的位址</translation>
+        <translation>選擇要匯出WAGERR幣的位址</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>選擇要接收Wagerr幣的位址</translation>
+        <translation>選擇要接收WAGERR幣的位址</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -62,12 +62,12 @@
         <translation>接收的位址</translation>
     </message>
     <message>
-        <source>These are your Wagerr addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>這是你用來付款的 Wagerr 位址, 送出前, 請務必確認金額及接收位址是否正確.</translation>
+        <source>These are your WAGERR addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>這是你用來付款的 WAGERR 位址, 送出前, 請務必確認金額及接收位址是否正確.</translation>
     </message>
     <message>
-        <source>These are your Wagerr addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>這是你用來接收款項的 Wagerr 位址, 建議你每次付款都使用新的位址.</translation>
+        <source>These are your WAGERR addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>這是你用來接收款項的 WAGERR 位址, 建議你每次付款都使用新的位址.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -164,8 +164,8 @@
         <translation>錢包確認加密</translation>
     </message>
     <message>
-        <source>Wagerr will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your WGRs from being stolen by malware infecting your computer.</source>
-        <translation>Wagerr 現在會關閉程式來處理加密流程, 請注意, 僅僅是加密你的錢包並不能完全保護你的 WGR 幣被可疑軟體或病毒偷走的風險.</translation>
+        <source>WAGERR will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your WGRs from being stolen by malware infecting your computer.</source>
+        <translation>WAGERR 現在會關閉程式來處理加密流程, 請注意, 僅僅是加密你的錢包並不能完全保護你的 WGR 幣被可疑軟體或病毒偷走的風險.</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -217,6 +217,9 @@
     </message>
 </context>
 <context>
+    <name>BanTableModel</name>
+    </context>
+<context>
     <name>Bip38ToolDialog</name>
     <message>
         <source>BIP 38 Tool</source>
@@ -227,16 +230,8 @@
         <translation>&amp;BIP 38 加密</translation>
     </message>
     <message>
-        <source>Enter a Wagerr Address that you would like to encrypt using BIP 38. Enter a passphrase in the middle box. Press encrypt to compute the encrypted private key.</source>
-        <translation>輸入你想 BIP 38 加密的 Wagerr 位址, 輸入密碼在中間欄, 按下加密按鈕來產生加密私鑰.</translation>
-    </message>
-    <message>
         <source>Address:</source>
         <translation>位址:</translation>
-    </message>
-    <message>
-        <source>The Wagerr address to sign the message with</source>
-        <translation>對訊息簽名的 Wagerr 位址</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -267,16 +262,8 @@
         <translation>拷貝目前的簽章到系統剪貼簿</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Wagerr address</source>
-        <translation>使用簽章來證明你是該  Wagerr 位址的擁有者,</translation>
-    </message>
-    <message>
         <source>Encrypt &amp;Key</source>
         <translation>加密 &amp;鑰匙</translation>
-    </message>
-    <message>
-        <source>Reset all sign message fields</source>
-        <translation>重設所有已簽章訊息</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
@@ -287,20 +274,8 @@
         <translation>&amp;BIP 38 解密</translation>
     </message>
     <message>
-        <source>The Wagerr address the message was signed with</source>
-        <translation>此訊息之 Wagerr 位址已簽章於</translation>
-    </message>
-    <message>
-        <source>Verify the message to ensure it was signed with the specified Wagerr address</source>
-        <translation>驗證訊息以確保該  Wagerr 位址已被簽章</translation>
-    </message>
-    <message>
         <source>Decrypt &amp;Key</source>
         <translation>解密 &amp;鑰匙</translation>
-    </message>
-    <message>
-        <source>Reset all verify message fields</source>
-        <translation>重設所有驗證訊息的欄位</translation>
     </message>
     <message>
         <source>Decrypted Key:</source>
@@ -582,12 +557,12 @@
         <translation>Tabs 工具列</translation>
     </message>
     <message>
-        <source>Wagerr Core</source>
-        <translation>Wagerr Core</translation>
+        <source>WAGERR Core</source>
+        <translation>WAGERR Core</translation>
     </message>
     <message>
-        <source>Send coins to a Wagerr address</source>
-        <translation>送出錢幣到 Wagerr 地址</translation>
+        <source>Send coins to a WAGERR address</source>
+        <translation>送出錢幣到 WAGERR 地址</translation>
     </message>
     <message>
         <source>Request payments (generates QR codes and wagerr: URIs)</source>
@@ -602,24 +577,24 @@
         <translation>瀏覽 Masternodes</translation>
     </message>
     <message>
-        <source>&amp;About Wagerr Core</source>
-        <translation>&amp;關於 Wagerr Core</translation>
+        <source>&amp;About WAGERR Core</source>
+        <translation>&amp;關於 WAGERR Core</translation>
     </message>
     <message>
-        <source>Show information about Wagerr Core</source>
-        <translation>顯示 Wagerr Core 相關資訊</translation>
+        <source>Show information about WAGERR Core</source>
+        <translation>顯示 WAGERR Core 相關資訊</translation>
     </message>
     <message>
-        <source>Modify configuration options for Wagerr</source>
-        <translation>修改 Wagerr 設定</translation>
+        <source>Modify configuration options for WAGERR</source>
+        <translation>修改 WAGERR 設定</translation>
     </message>
     <message>
-        <source>Sign messages with your Wagerr addresses to prove you own them</source>
-        <translation>使用你的 Wagerr 位址對訊息簽章, 來證明你是擁有者</translation>
+        <source>Sign messages with your WAGERR addresses to prove you own them</source>
+        <translation>使用你的 WAGERR 位址對訊息簽章, 來證明你是擁有者</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Wagerr addresses</source>
-        <translation>驗證訊息簽章與 Wagerr 位址吻合</translation>
+        <source>Verify messages to ensure they were signed with specified WAGERR addresses</source>
+        <translation>驗證訊息簽章與 WAGERR 位址吻合</translation>
     </message>
     <message>
         <source>&amp;BIP38 tool</source>
@@ -650,8 +625,8 @@
         <translation>打開Masternode設定檔</translation>
     </message>
     <message>
-        <source>Open a Wagerr: URI or payment request</source>
-        <translation>打開Wagerr: 位址或付款請求 </translation>
+        <source>Open a WAGERR: URI or payment request</source>
+        <translation>打開WAGERR: 位址或付款請求 </translation>
     </message>
     <message>
         <source>&amp;Blockchain explorer</source>
@@ -662,12 +637,12 @@
         <translation>區塊鏈瀏覽視窗</translation>
     </message>
     <message>
-        <source>Show the Wagerr Core help message to get a list with possible Wagerr command-line options</source>
-        <translation>顯示 Wagerr Core 幫助訊息以取得 Wagerr 命令列表選項</translation>
+        <source>Show the WAGERR Core help message to get a list with possible WAGERR command-line options</source>
+        <translation>顯示 WAGERR Core 幫助訊息以取得 WAGERR 命令列表選項</translation>
     </message>
     <message>
-        <source>Wagerr Core client</source>
-        <translation>Wagerr Core 客戶端</translation>
+        <source>WAGERR Core client</source>
+        <translation>WAGERR Core 客戶端</translation>
     </message>
     </context>
 <context>
@@ -694,17 +669,20 @@
     <name>FreespaceChecker</name>
     </context>
 <context>
+    <name>GovernancePage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Wagerr Core</source>
-        <translation>Wagerr Core</translation>
+        <source>WAGERR Core</source>
+        <translation>WAGERR Core</translation>
     </message>
     </context>
 <context>
     <name>Intro</name>
     <message>
-        <source>Wagerr Core</source>
-        <translation>Wagerr Core</translation>
+        <source>WAGERR Core</source>
+        <translation>WAGERR Core</translation>
     </message>
     </context>
 <context>
@@ -724,9 +702,13 @@
         <source>Address:</source>
         <translation>位址:</translation>
     </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(沒有標記)</translation>
+    </message>
     </context>
 <context>
-    <name>ObfuscationConfig</name>
+    <name>MultisigDialog</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -761,9 +743,20 @@
         <source>Alt+P</source>
         <translation>Alt+P</translation>
     </message>
+    <message>
+        <source>TextLabel</source>
+        <translation>文字標籤</translation>
+    </message>
+    </context>
+<context>
+    <name>ProposalFrame</name>
     </context>
 <context>
     <name>QObject</name>
+    <message>
+        <source>WAGERR Core</source>
+        <translation>WAGERR Core</translation>
+    </message>
     </context>
 <context>
     <name>QRImageWidget</name>
@@ -794,6 +787,10 @@
     <message>
         <source>Label</source>
         <translation>標記</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>位址</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -836,8 +833,8 @@
 <context>
     <name>SignVerifyMessageDialog</name>
     <message>
-        <source>The Wagerr address to sign the message with</source>
-        <translation>對訊息簽名的 Wagerr 位址</translation>
+        <source>The WAGERR address to sign the message with</source>
+        <translation>對訊息簽名的 WAGERR 位址</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -860,16 +857,16 @@
         <translation>拷貝目前的簽章到系統剪貼簿</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Wagerr address</source>
-        <translation>使用簽章來證明你是該  Wagerr 位址的擁有者,</translation>
+        <source>Sign the message to prove you own this WAGERR address</source>
+        <translation>使用簽章來證明你是該  WAGERR 位址的擁有者,</translation>
     </message>
     <message>
-        <source>The Wagerr address the message was signed with</source>
-        <translation>此訊息之 Wagerr 位址已簽章於</translation>
+        <source>The WAGERR address the message was signed with</source>
+        <translation>此訊息之 WAGERR 位址已簽章於</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Wagerr address</source>
-        <translation>驗證訊息以確保該  Wagerr 位址已被簽章</translation>
+        <source>Verify the message to ensure it was signed with the specified WAGERR address</source>
+        <translation>驗證訊息以確保該  WAGERR 位址已被簽章</translation>
     </message>
     <message>
         <source>Reset all sign message fields</source>
@@ -907,8 +904,8 @@
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Wagerr Core</source>
-        <translation>Wagerr Core</translation>
+        <source>WAGERR Core</source>
+        <translation>WAGERR Core</translation>
     </message>
     </context>
 <context>
@@ -971,7 +968,7 @@
     </message>
     </context>
 <context>
-    <name>ZWgrControlDialog</name>
+    <name>XWgrControlDialog</name>
     </context>
 <context>
     <name>wagerr-core</name>

@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2017 The PIVX Core developers
+// Copyright (c) 2015-2018 The PIVX developers
 // Copyright (c) 2018 The Wagerr developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -9,6 +9,7 @@
 #ifndef BITCOIN_CHAINPARAMS_H
 #define BITCOIN_CHAINPARAMS_H
 
+#include "betting/quickgames/qgview.h"
 #include "chainparamsbase.h"
 #include "checkpoints.h"
 #include "primitives/block.h"
@@ -58,6 +59,10 @@ public:
     int ToCheckBlockUpgradeMajority() const { return nToCheckBlockUpgradeMajority; }
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
 
+    /** Betting undo data is used to check blocks during init      **/
+    /** Hence, the max undo depth is also the max for -checkblocks **/
+    int MaxBettingUndoDepth() const { return nMaxBettingUndoDepth; }
+
     /** Used if GenerateBitcoins is called with a negative number of threads */
     int DefaultMinerThreads() const { return nMinerThreads; }
     const CBlock& GenesisBlock() const { return genesis; }
@@ -73,10 +78,19 @@ public:
     bool SkipProofOfWorkCheck() const { return fSkipProofOfWorkCheck; }
     /** Make standard checks */
     bool RequireStandard() const { return fRequireStandard; }
-    int64_t TargetTimespan() const { return nTargetTimespan; }
     int64_t TargetSpacing() const { return nTargetSpacing; }
-    int64_t Interval() const { return nTargetTimespan / nTargetSpacing; }
+
+    /** returns the coinbase maturity **/
     int COINBASE_MATURITY() const { return nMaturity; }
+
+    /** returns the coinstake maturity (min depth required) **/
+    int COINSTAKE_MIN_DEPTH() const { return nStakeMinDepth; }
+    bool HasStakeMinAgeOrDepth(const int contextHeight, const uint32_t contextTime, const int utxoFromBlockHeight, const uint32_t utxoFromBlockTime) const;
+
+    /** returns the max future time (and drift in seconds) allowed for a block in the future **/
+    int FutureBlockTimeDrift(const bool isPoS) const { return isPoS ? nFutureTimeDriftPoS : nFutureTimeDriftPoW; }
+    uint32_t MaxFutureBlockTime(uint32_t time, const bool isPoS) const { return time + FutureBlockTimeDrift(isPoS); }
+
     CAmount MaxMoneyOut() const { return nMaxMoneyOut; }
     /** The masternode count that we will allow the see-saw reward payments to be off by */
     int MasternodeCountDrift() const { return nMasternodeCountDrift; }
@@ -91,21 +105,32 @@ public:
     const std::vector<CAddress>& FixedSeeds() const { return vFixedSeeds; }
     virtual const Checkpoints::CCheckpointData& Checkpoints() const = 0;
     int PoolMaxTransactions() const { return nPoolMaxTransactions; }
+    /** Return the number of blocks in a budget cycle */
+    int GetBudgetCycleBlocks() const { return nBudgetCycleBlocks; }
+    int64_t GetProposalEstablishmentTime() const { return nProposalEstablishmentTime; }
+
+    /** Spork key and Masternode Handling **/
     std::string SporkKey() const { return strSporkKey; }
+    std::string SporkKeyOld() const { return strSporkKeyOld; }
+    int64_t NewSporkStart() const { return nEnforceNewSporkKey; }
+    int64_t RejectOldSporkKey() const { return nRejectOldSporkKey; }
     std::string ObfuscationPoolDummyAddress() const { return strObfuscationPoolDummyAddress; }
     int64_t StartMasternodePayments() const { return nStartMasternodePayments; }
     int64_t Budget_Fee_Confirmations() const { return nBudget_Fee_Confirmations; }
+
     CBaseChainParams::Network NetworkID() const { return networkID; }
 
     /** Zerocoin **/
     std::string Zerocoin_Modulus() const { return zerocoinModulus; }
-    libzerocoin::ZerocoinParams* Zerocoin_Params() const;
+    libzerocoin::ZerocoinParams* Zerocoin_Params(bool useModulusV1) const;
     int Zerocoin_MaxSpendsPerTransaction() const { return nMaxZerocoinSpendsPerTransaction; }
+    int Zerocoin_MaxPublicSpendsPerTransaction() const { return nMaxZerocoinPublicSpendsPerTransaction; }
     CAmount Zerocoin_MintFee() const { return nMinZerocoinMintFee; }
     int Zerocoin_MintRequiredConfirmations() const { return nMintRequiredConfirmations; }
     int Zerocoin_RequiredAccumulation() const { return nRequiredAccumulation; }
     int Zerocoin_DefaultSpendSecurity() const { return nDefaultSecurityLevel; }
     int Zerocoin_HeaderVersion() const { return nZerocoinHeaderVersion; }
+    int Zerocoin_RequiredStakeDepth() const { return nZerocoinRequiredStakeDepth; }
 
     /** Height or Time Based Activations **/
     int ModifierUpgradeBlock() const { return nModifierUpdateBlock; }
@@ -117,6 +142,41 @@ public:
     int Zerocoin_Block_LastGoodCheckpoint() const { return nBlockLastGoodCheckpoint; }
     int Zerocoin_StartTime() const { return nZerocoinStartTime; }
     int Block_Enforce_Invalid() const { return nBlockEnforceInvalidUTXO; }
+    int Zerocoin_Block_V2_Start() const { return nBlockZerocoinV2; }
+    int BIP65Height() const { return nBIP65Height; }
+    bool IsStakeModifierV2(const int nHeight) const { return nHeight >= nBlockStakeModifierlV2; }
+
+    // fake serial attack
+    int Zerocoin_Block_EndFakeSerial() const { return nFakeSerialBlockheightEnd; }
+    CAmount GetSupplyBeforeFakeSerial() const { return nSupplyBeforeFakeSerial; }
+
+    int Zerocoin_Block_Double_Accumulated() const { return nBlockDoubleAccumulated; }
+    CAmount InvalidAmountFiltered() const { return nInvalidAmountFiltered; };
+
+    int Zerocoin_Block_Public_Spend_Enabled() const { return nPublicZCSpends; }
+
+    int Zerocoin_AccumulationStartHeight() const { return nZerocoinAccumulationStartHeight; }
+
+    /** Betting on blockchain **/
+    std::vector<std::string> OracleWalletAddrs() const { return vOracleWalletAddrs; }
+    int BetBlocksIndexTimespan() const { return nBetBlocksIndexTimespan; }
+    int BetStartHeight() const { return nBetStartHeight; }
+    std::string DevPayoutAddr() const { return strDevPayoutAddr; }
+    std::string OMNOPayoutAddr() const { return strOMNOPayoutAddr; }
+    uint64_t OMNORewardPermille() const { return nOMNORewardPermille; }
+    uint64_t DevRewardPermille() const { return nDevRewardPermille; }
+    int BetBlockPayoutAmount() const { return nBetBlockPayoutAmount; } // Currently not used
+    int64_t MaxBetPayoutRange() const { return nMaxBetPayoutRange; }
+    int64_t MinBetPayoutRange() const { return nMinBetPayoutRange; }
+    int64_t MaxParlayBetPayoutRange() const { return nMaxBetPayoutRange; }
+    int BetPlaceTimeoutBlocks() const { return nBetPlaceTimeoutBlocks; }
+    uint32_t MaxParlayLegs() const { return nMaxParlayLegs; }
+    int WagerrProtocolV3StartHeight() const { return nWagerrProtocolV3StartHeight; }
+    const std::vector<CQuickGamesView>& QuickGamesArr() const { return quickGamesArr; }
+
+    /** temp worarounds **/
+    int ZerocoinCheckTX() const { return nZerocoinCheckTX; }
+    int ZerocoinCheckTXexclude() const { return nZerocoinCheckTXexclude; }
 
 protected:
     CChainParams() {}
@@ -128,15 +188,19 @@ protected:
     int nDefaultPort;
     uint256 bnProofOfWorkLimit;
     int nMaxReorganizationDepth;
+    int nMaxBettingUndoDepth;
     int nSubsidyHalvingInterval;
     int nEnforceBlockUpgradeMajority;
     int nRejectBlockOutdatedMajority;
     int nToCheckBlockUpgradeMajority;
-    int64_t nTargetTimespan;
     int64_t nTargetSpacing;
     int nLastPOWBlock;
     int nMasternodeCountDrift;
     int nMaturity;
+    int nStakeMinDepth;
+    int nFutureTimeDriftPoW;
+    int nFutureTimeDriftPoS;
+
     int nModifierUpdateBlock;
     CAmount nMaxMoneyOut;
     int nMinerThreads;
@@ -155,12 +219,18 @@ protected:
     bool fTestnetToBeDeprecatedFieldRPC;
     bool fHeadersFirstSyncingActive;
     int nPoolMaxTransactions;
+    int nBudgetCycleBlocks;
     std::string strSporkKey;
+    std::string strSporkKeyOld;
+    int64_t nEnforceNewSporkKey;
+    int64_t nRejectOldSporkKey;
     std::string strObfuscationPoolDummyAddress;
     int64_t nStartMasternodePayments;
     std::string zerocoinModulus;
     int nMaxZerocoinSpendsPerTransaction;
+    int nMaxZerocoinPublicSpendsPerTransaction;
     CAmount nMinZerocoinMintFee;
+    CAmount nInvalidAmountFiltered;
     int nMintRequiredConfirmations;
     int nRequiredAccumulation;
     int nDefaultSecurityLevel;
@@ -168,12 +238,46 @@ protected:
     int64_t nBudget_Fee_Confirmations;
     int nZerocoinStartHeight;
     int nZerocoinStartTime;
+    int nZerocoinRequiredStakeDepth;
+    int64_t nProposalEstablishmentTime;
 
     int nBlockEnforceSerialRange;
     int nBlockRecalculateAccumulators;
     int nBlockFirstFraudulent;
     int nBlockLastGoodCheckpoint;
     int nBlockEnforceInvalidUTXO;
+    int nBlockZerocoinV2;
+    int nBlockDoubleAccumulated;
+    int nPublicZCSpends;
+    int nBIP65Height;
+    int nBlockStakeModifierlV2;
+
+    // fake serial attack
+    int nFakeSerialBlockheightEnd = 0;
+    CAmount nSupplyBeforeFakeSerial = 0;
+
+    int nZerocoinAccumulationStartHeight;
+
+    std::vector<std::string> vOracleWalletAddrs;
+    int nBetBlocksIndexTimespan;
+    int nBetStartHeight;
+    std::string strDevPayoutAddr;
+    std::string strOMNOPayoutAddr;
+    uint64_t nOMNORewardPermille;
+    uint64_t nDevRewardPermille;
+    uint64_t nBetBlockPayoutAmount;
+    int64_t nMinBetPayoutRange;
+    int64_t nMaxBetPayoutRange;
+    int64_t nMaxParlayBetPayoutRange;
+    int nBetPlaceTimeoutBlocks;
+    uint32_t nMaxParlayLegs;
+    int nWagerrProtocolV3StartHeight;
+
+    std::vector<CQuickGamesView> quickGamesArr;
+
+    // workarounds
+    int nZerocoinCheckTX;
+    int nZerocoinCheckTXexclude;
 };
 
 /**

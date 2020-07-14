@@ -1,5 +1,7 @@
-// Copyright (c) 2011-2013 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2011-2015 The Bitcoin developers
+// Copyright (c) 2016-2018 The PIVX developers
+// Copyright (c) 2018 The Wagerr developers
+// Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "walletview.h"
@@ -9,6 +11,7 @@
 #include "bitcoingui.h"
 #include "blockexplorer.h"
 #include "clientmodel.h"
+#include "governancepage.h"
 #include "guiutil.h"
 #include "masternodeconfig.h"
 #include "multisenddialog.h"
@@ -18,12 +21,14 @@
 #include "receivecoinsdialog.h"
 #include "privacydialog.h"
 #include "sendcoinsdialog.h"
+#include "placebetdialog.h"
+#include "placebetevent.h"
 #include "signverifymessagedialog.h"
 #include "transactiontablemodel.h"
 #include "transactionview.h"
 #include "walletmodel.h"
 
-#include "ui_interface.h"
+#include "guiinterface.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -34,6 +39,10 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QVBoxLayout>
+
+#include <cstdio>
+#include <boost/algorithm/string.hpp>
+#include <boost/assign/list_of.hpp>
 
 WalletView::WalletView(QWidget* parent) : QStackedWidget(parent),
                                           clientModel(0),
@@ -115,14 +124,18 @@ WalletView::WalletView(QWidget* parent) : QStackedWidget(parent),
     transactionsPage->setLayout(vbox);
 
     privacyPage = new PrivacyDialog();
+    governancePage = new GovernancePage();
     receiveCoinsPage = new ReceiveCoinsDialog();
     sendCoinsPage = new SendCoinsDialog();
+    //placeBetPage = new PlaceBetDialog();
 
     addWidget(overviewPage);
     addWidget(transactionsPage);
+    addWidget(governancePage);
     addWidget(privacyPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
+    //addWidget(placeBetPage);
     addWidget(explorerWindow);
 
     QSettings settings;
@@ -145,6 +158,9 @@ WalletView::WalletView(QWidget* parent) : QStackedWidget(parent),
 
     // Pass through messages from sendCoinsPage
     connect(sendCoinsPage, SIGNAL(message(QString, QString, unsigned int)), this, SIGNAL(message(QString, QString, unsigned int)));
+
+    // Pass through messages from sendCoinsPage
+    //connect(placeBetPage, SIGNAL(message(QString, QString, unsigned int)), this, SIGNAL(message(QString, QString, unsigned int)));
 
     // Pass through messages from transactionView
     connect(transactionView, SIGNAL(message(QString, QString, unsigned int)), this, SIGNAL(message(QString, QString, unsigned int)));
@@ -181,6 +197,7 @@ void WalletView::setClientModel(ClientModel* clientModel)
     if (settings.value("fShowMasternodesTab").toBool()) {
         masternodeListPage->setClientModel(clientModel);
     }
+    governancePage->setClientModel(clientModel);
 }
 
 void WalletView::setWalletModel(WalletModel* walletModel)
@@ -197,6 +214,8 @@ void WalletView::setWalletModel(WalletModel* walletModel)
     privacyPage->setModel(walletModel);
     receiveCoinsPage->setModel(walletModel);
     sendCoinsPage->setModel(walletModel);
+    governancePage->setWalletModel(walletModel);
+    //placeBetPage->setModel(walletModel);
 
     if (walletModel) {
         // Receive and pass through messages from wallet model
@@ -248,6 +267,10 @@ void WalletView::gotoHistoryPage()
     setCurrentWidget(transactionsPage);
 }
 
+void WalletView::gotoGovernancePage()
+{
+    setCurrentWidget(governancePage);
+}
 
 void WalletView::gotoBlockExplorerPage()
 {
@@ -280,6 +303,230 @@ void WalletView::gotoSendCoinsPage(QString addr)
 
     if (!addr.isEmpty())
         sendCoinsPage->setAddress(addr);
+}
+
+void WalletView::gotoPlaceBetPage(QString addr)
+{
+    setCurrentWidget(placeBetPage);
+
+    // go thru blockchain and get data
+
+    // Set the Oracle wallet address. 
+    std::vector<std::string> oracleAddrs = Params().OracleWalletAddrs();
+
+    // Set event name
+    std::string evtDes;
+
+    std::map<std::string, std::string> eventNames;
+    eventNames.insert(std::make_pair("WCUP", "World Cup"));
+
+    std::map<std::string, std::string> roundNames;
+    roundNames.insert(std::make_pair("R1", "Round 1"));
+    roundNames.insert(std::make_pair("RD2", "Round 2"));
+    roundNames.insert(std::make_pair("RD3", "Round 3"));
+    roundNames.insert(std::make_pair("F16", "Final 16"));
+    roundNames.insert(std::make_pair("QFL", "Quarter Final"));
+    roundNames.insert(std::make_pair("SFL", "Semi Final"));
+    roundNames.insert(std::make_pair("FIN", "Final"));
+
+
+    std::map<std::string, std::string> countryNames;
+    countryNames.insert(std::make_pair("ARG", "Argentina"));
+    countryNames.insert(std::make_pair("AUS", "Australia"));
+    countryNames.insert(std::make_pair("BRA", "Brazil"));
+    countryNames.insert(std::make_pair("CRC", "Costa Rica"));
+    countryNames.insert(std::make_pair("DEN", "Denmark"));
+    countryNames.insert(std::make_pair("EGY", "Egypt"));
+    countryNames.insert(std::make_pair("ESP", "Spain"));
+    countryNames.insert(std::make_pair("FRA", "France"));
+    countryNames.insert(std::make_pair("GER", "Germany"));
+    countryNames.insert(std::make_pair("IRN", "Iran"));
+    countryNames.insert(std::make_pair("ISL", "Iceland"));
+    countryNames.insert(std::make_pair("KSA", "Saudi Arabia"));
+    countryNames.insert(std::make_pair("MAR", "Morocco"));
+    countryNames.insert(std::make_pair("MEX", "Mexico"));
+    countryNames.insert(std::make_pair("PER", "Peru"));
+    countryNames.insert(std::make_pair("POR", "Portugal"));
+    countryNames.insert(std::make_pair("RUS", "Russia"));
+    countryNames.insert(std::make_pair("SRB", "Serbia"));
+    countryNames.insert(std::make_pair("URU", "Uruguay"));
+    countryNames.insert(std::make_pair("BEL", "Belgium"));
+    countryNames.insert(std::make_pair("COL", "Columbia"));
+    countryNames.insert(std::make_pair("CRO", "Croatia"));
+    countryNames.insert(std::make_pair("ENG", "England"));
+    countryNames.insert(std::make_pair("JPN", "Japan"));
+    countryNames.insert(std::make_pair("KOR", "Korea Republic"));
+    countryNames.insert(std::make_pair("NGA", "Nigeria"));
+    countryNames.insert(std::make_pair("NIG", "Nigeria"));
+    countryNames.insert(std::make_pair("PAN", "Panama"));
+    countryNames.insert(std::make_pair("POL", "Poland"));
+    countryNames.insert(std::make_pair("SEN", "Senegal"));
+    countryNames.insert(std::make_pair("SWE", "Sweden"));
+    countryNames.insert(std::make_pair("SUI", "Switzerland"));
+    countryNames.insert(std::make_pair("TUN", "Tunisia "));
+
+    placeBetPage->clear();
+    std::vector<CEvent *> eventsVector;
+
+    // Look back to the betting start block for events to list on the wallet QT.
+    CBlockIndex* pindex =  chainActive.Height() > Params().BetStartHeight() ? chainActive[Params().BetStartHeight()] : NULL;
+
+    while (pindex) {
+
+        CBlock block;
+        ReadBlockFromDisk(block, pindex);
+
+        for (CTransaction& tx : block.vtx) {
+
+            // Ensure event TX has been posted by Oracle wallet.
+            bool validEventTx = false;
+            const CTxIn &txin = tx.vin[0];
+            COutPoint prevout = txin.prevout;
+
+            uint256 hashBlock;
+            CTransaction txPrev;
+            if (GetTransaction(prevout.hash, txPrev, hashBlock, true)) {
+
+                const CTxOut &prevTxOut  = txPrev.vout[0];
+                std::string scriptPubKey = prevTxOut.scriptPubKey.ToString();
+
+                txnouttype type;
+                std::vector<CTxDestination> prevAddrs;
+                int nRequired;
+                if(ExtractDestinations(prevTxOut.scriptPubKey, type, prevAddrs, nRequired)) {
+
+                    for (const CTxDestination &prevAddr : prevAddrs) {
+                        if (std::find(oracleAddrs.begin(), oracleAddrs.end(), CBitcoinAddress(prevAddr).ToString()) != oracleAddrs.end()) {
+                            validEventTx = true;
+                        }
+                    }
+                }
+            }
+
+            // Check TX vouts to see if they contain event op code.
+            for (unsigned int i = 0; i < tx.vout.size(); i++) {
+
+                const CTxOut& txout = tx.vout[i];
+                std::string scriptPubKey = txout.scriptPubKey.ToString();
+
+                // TODO Remove hard-coded values from this block.
+                if ( validEventTx && scriptPubKey.length() > 0 && strncmp(scriptPubKey.c_str(), "OP_RETURN", 9) == 0) {
+
+                    std::vector<unsigned char> v = ParseHex(scriptPubKey.substr(9, std::string::npos));
+                    std::string evtDescr(v.begin(), v.end());
+                    std::vector<std::string> strs;
+                    boost::split(strs, evtDescr, boost::is_any_of("|"));
+
+                    if (strs.size() != 11 ) {
+                        continue;
+                    }
+
+                    time_t time = (time_t) std::strtol(strs[3].c_str(), nullptr, 10);
+                    CEvent *event = CEvent::ParseEvent(evtDescr);
+                    time_t currentTime = std::time(0);
+
+                    // Only add events up until 22 minutes (1320 seconds) before they start.
+                    if( time > ( currentTime + 1320 ) ){
+
+                        // Add events to vector
+                        eventsVector.push_back(event);
+                    }
+                }
+            }
+        }
+
+        pindex = chainActive.Next(pindex);
+    }
+
+    //remove duplicates from list (Remove older duplicates)
+    std::vector<CEvent *>  cleanEventsVector;
+    for(unsigned int i = 0; i < eventsVector.size(); i++ ){
+
+        bool found = false;
+
+        //loop through and check if the eventid matches a result event id
+        for (unsigned int j = 0; j < cleanEventsVector.size(); j++) {
+
+            if (eventsVector[i]->id == cleanEventsVector[j]->id) {
+                found = true;
+
+                //remove the event if all odds are zero (cancel event TX)
+                if( eventsVector[i]->homeOdds == "N/A" && eventsVector[i]->awayOdds == "N/A" && eventsVector[i]->drawOdds == "N/A" ){
+                    cleanEventsVector.erase(cleanEventsVector.begin() + j);
+                }
+                //replace the old event details with the updated event details
+                else
+                {
+                    std::replace(cleanEventsVector.begin(), cleanEventsVector.end(), cleanEventsVector[j], eventsVector[i]);
+                }
+            }
+        }
+
+        //if not found put the event into the clean list
+        if( ! found){
+            cleanEventsVector.push_back(eventsVector[i]);
+        }
+    }
+
+    struct compare_times{
+        inline bool operator() (CEvent *event1, CEvent *event2){
+            return (event1->starting < event2->starting);
+        }
+    };
+    std::sort(cleanEventsVector.begin(), cleanEventsVector.end(), compare_times());
+
+    //put events on screen
+    for(unsigned int i = 0; i < cleanEventsVector.size(); i++ ){
+
+        std::string evtDes = "";
+        time_t time = (time_t) std::strtol(cleanEventsVector[i]->starting.c_str(), nullptr, 10);
+
+        std::map<std::string, std::string>::iterator it;
+        it = eventNames.find(cleanEventsVector[i]->name);
+        // TODO Investigate whether it would be better to skip event
+        // descriptions with unsupported fields rather than to
+        // output those fields.
+        evtDes += it == eventNames.end() ? cleanEventsVector[i]->name : it->second;
+
+        evtDes += " ";
+        it = roundNames.find(cleanEventsVector[i]->round);
+        evtDes += it == roundNames.end() ? cleanEventsVector[i]->round : it->second;
+        evtDes += "   ";
+
+
+        tm *ptm = std::gmtime(&time);
+        static const char mon_name[][4] = {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+        char result[22];
+
+        sprintf(
+            result,
+            "%.2d:%.2d UTC+0   %.2d %3s",
+            ptm->tm_hour,
+            ptm->tm_min,
+            ptm->tm_mday,
+            mon_name[ptm->tm_mon]
+        );
+        evtDes += result;
+
+        evtDes += "   ";
+        it = countryNames.find(cleanEventsVector[i]->homeTeam);
+        evtDes += it == countryNames.end() ? cleanEventsVector[i]->homeTeam : it->second;
+        evtDes += " V ";
+        it = countryNames.find(cleanEventsVector[i]->awayTeam);
+        evtDes += it == countryNames.end() ? cleanEventsVector[i]->awayTeam : it->second;
+
+
+        placeBetPage->addEvent(
+            cleanEventsVector[i],
+            evtDes,
+            cleanEventsVector[i]->homeOdds,
+            cleanEventsVector[i]->awayOdds,
+            cleanEventsVector[i]->drawOdds
+        );
+    }
 }
 
 void WalletView::gotoSignMessageTab(QString addr)
@@ -363,14 +610,7 @@ void WalletView::backupWallet()
 
     if (filename.isEmpty())
         return;
-
-    if (!walletModel->backupWallet(filename)) {
-        emit message(tr("Backup Failed"), tr("There was an error trying to save the wallet data to %1.").arg(filename),
-            CClientUIInterface::MSG_ERROR);
-    } else {
-        emit message(tr("Backup Successful"), tr("The wallet data was successfully saved to %1.").arg(filename),
-            CClientUIInterface::MSG_INFORMATION);
-    }
+    walletModel->backupWallet(filename);
 }
 
 void WalletView::changePassphrase()

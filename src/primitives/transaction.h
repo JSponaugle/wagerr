@@ -9,6 +9,7 @@
 #define BITCOIN_PRIMITIVES_TRANSACTION_H
 
 #include "amount.h"
+#include "libzerocoin/CoinSpend.h"
 #include "script/script.h"
 #include "serialize.h"
 #include "uint256.h"
@@ -79,6 +80,7 @@ public:
 
     explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=std::numeric_limits<unsigned int>::max());
     CTxIn(uint256 hashPrevTx, uint32_t nOut, CScript scriptSigIn=CScript(), uint32_t nSequenceIn=std::numeric_limits<uint32_t>::max());
+    CTxIn(const libzerocoin::CoinSpend& spend, libzerocoin::CoinDenomination denom);
 
     ADD_SERIALIZE_METHODS;
 
@@ -93,6 +95,9 @@ public:
     {
         return (nSequence == std::numeric_limits<uint32_t>::max());
     }
+
+    bool IsZerocoinSpend() const;
+    bool IsZerocoinPublicSpend() const;
 
     friend bool operator==(const CTxIn& a, const CTxIn& b)
     {
@@ -125,7 +130,7 @@ public:
     }
 
     CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn);
-
+    
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -164,18 +169,16 @@ public:
         // "Dust" is defined in terms of CTransaction::minRelayTxFee, which has units uwgr-per-kilobyte.
         // If you'd pay more than 1/3 in fees to spend something, then we consider it dust.
         // A typical txout is 34 bytes big, and will need a CTxIn of at least 148 bytes to spend
-        // i.e. total is 148 + 32 = 182 bytes. Default -minrelaytxfee is 10000 uwgr per kB
-        // and that means that fee per txout is 182 * 10000 / 1000 = 1820 uwgr.
-        // So dust is a txout less than 1820 *3 = 5460 uwgr
-        // with default -minrelaytxfee = minRelayTxFee = 10000 uwgr per kB.
+        // i.e. total is 148 + 32 = 182 bytes. Default -minrelaytxfee is 100000 uwgr per kB
+        // and that means that fee per txout is 182 * 100000 / 1000 = 18200 uwgr.
+        // So dust is a txout less than 1820 *3 = 54600 uwgr
+        // with default -minrelaytxfee = minRelayTxFee = 100000 uwgr per kB.
         size_t nSize = GetSerializeSize(SER_DISK,0)+148u;
         return (nValue < 3*minRelayTxFee.GetFee(nSize));
     }
 
-    bool IsZerocoinMint() const
-    {
-        return !scriptPubKey.empty() && scriptPubKey.IsZerocoinMint();
-    }
+    bool IsZerocoinMint() const;
+    CAmount GetZerocoinMinted() const;
 
     friend bool operator==(const CTxOut& a, const CTxOut& b)
     {
@@ -187,6 +190,11 @@ public:
     friend bool operator!=(const CTxOut& a, const CTxOut& b)
     {
         return !(a == b);
+    }
+
+    friend bool operator<(const CTxOut& a, const CTxOut& b)
+    {
+        return (a.nValue < b.nValue || (a.nValue == b.nValue && a.scriptPubKey < b.scriptPubKey));
     }
 
     std::string ToString() const;
@@ -249,6 +257,9 @@ public:
 
     // Return sum of txouts.
     CAmount GetValueOut() const;
+
+    CAmount AddVoutValues(CAmount& nValueOut, CAmount& nValueBurned) const;
+    CAmount GetValueBurned() const;
     // GetValueIn() is a method on CCoinsViewCache, because
     // inputs must be known to compute value in.
 
@@ -258,23 +269,14 @@ public:
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
 
-    bool IsZerocoinSpend() const
-    {
-        return (vin.size() > 0 && vin[0].prevout.IsNull() && vin[0].scriptSig[0] == OP_ZEROCOINSPEND);
-    }
+    bool HasZerocoinSpendInputs() const;
+    bool HasZerocoinPublicSpendInputs() const;
 
-    bool IsZerocoinMint() const
-    {
-        for(const CTxOut& txout : vout) {
-            if (txout.scriptPubKey.IsZerocoinMint())
-                return true;
-        }
-        return false;
-    }
+    bool HasZerocoinMintOutputs() const;
 
     bool ContainsZerocoins() const
     {
-        return IsZerocoinSpend() || IsZerocoinMint();
+        return HasZerocoinSpendInputs() || HasZerocoinPublicSpendInputs() || HasZerocoinMintOutputs();
     }
 
     CAmount GetZerocoinMinted() const;
@@ -289,11 +291,7 @@ public:
         return (vin.size() == 1 && vin[0].prevout.IsNull() && !ContainsZerocoins());
     }
 
-    bool IsCoinStake() const
-    {
-        // ppcoin: the coin stake transaction is marked with the first output empty
-        return (vin.size() > 0 && (!vin[0].prevout.IsNull()) && vout.size() >= 2 && vout[0].IsEmpty());
-    }
+    bool IsCoinStake() const;
 
     friend bool operator==(const CTransaction& a, const CTransaction& b)
     {
@@ -306,8 +304,6 @@ public:
     }
 
     std::string ToString() const;
-
-    bool GetCoinAge(uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
 };
 
 /** A mutable version of CTransaction. */
@@ -338,17 +334,6 @@ struct CMutableTransaction
     uint256 GetHash() const;
 
     std::string ToString() const;
-
-    friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
-    {
-        return a.GetHash() == b.GetHash();
-    }
-
-    friend bool operator!=(const CMutableTransaction& a, const CMutableTransaction& b)
-    {
-        return !(a == b);
-    }
-
 };
 
 #endif // BITCOIN_PRIMITIVES_TRANSACTION_H

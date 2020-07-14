@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2013 The Bitcoin developers
+// Copyright (c) 2017-2018 The PIVX developers
+// Copyright (c) 2018 The Wagerr developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -42,7 +44,8 @@ public:
         Mint_zWGR,      /** Mint zWGR */
         BIP_38,         /** BIP38 menu */
         Multi_Sig,      /** Multi-Signature dialog */
-        Sign_Message    /** Sign/verify message dialog */
+        Sign_Message,   /** Sign/verify message dialog */
+        UI_Vote,        /** Governance Tab UI Voting */
     };
 
     explicit AskPassphraseDialog(Mode mode, QWidget* parent, WalletModel* model, Context context);
