@@ -176,7 +176,6 @@ UniValue getmappingjson(const UniValue &params, bool fHelp)
     const std::string mIndex{params[0].get_str()};
     const MappingType type{CMappingDB::FromTypeName(mIndex)};
     UniValue result{UniValue::VARR};
-    UniValue mappings{UniValue::VOBJ};
 
     if (static_cast<int>(type) < 0 || CMappingDB::ToTypeName(type) != mIndex) {
         throw std::runtime_error("No mapping exist for the mapping index you provided.");
@@ -185,6 +184,7 @@ UniValue getmappingjson(const UniValue &params, bool fHelp)
     auto it = bettingsView->mappings->NewIterator();
     MappingKey key{};
     for (it->Seek(CBettingDB::DbTypeToBytes(MappingKey{type, 0})); it->Valid() && (CBettingDB::BytesToDbType(it->Key(), key), key.nMType == type); it->Next()) {
+        UniValue mappings{UniValue::VOBJ};
         CMappingDB mapping{};
         CBettingDB::BytesToDbType(it->Value(), mapping);
         mappings.push_back(Pair("mapping-id", (uint64_t) key.nId));
