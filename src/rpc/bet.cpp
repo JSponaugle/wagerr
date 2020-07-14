@@ -191,10 +191,9 @@ UniValue getmappingjson(const UniValue &params, bool fHelp)
         mappings.push_back(Pair("mapping-name", mapping.sName));
         mappings.push_back(Pair("exists", true));
         mappings.push_back(Pair("mapping-index", mIndex));
+
+        result.push_back(mappings);
     }
-
-    result.push_back(mappings);
-
     return result;
 }
 
